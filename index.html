@@ -1,189 +1,84 @@
 <!DOCTYPE html>
 <html lang="bn">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MojoBot | Your AI Companion</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;600&family=Inter:wght@300;400;600&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;600&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 
     <style>
-        body {
-            font-family: 'Inter', 'Hind Siliguri', sans-serif;
-            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .chat-window {
-            height: calc(100vh - 180px);
-            scrollbar-width: thin;
-            scrollbar-color: rgba(99, 102, 241, 0.5) transparent;
-        }
-
-        .chat-window::-webkit-scrollbar {
-            width: 4px;
-        }
-
-        .chat-window::-webkit-scrollbar-thumb {
-            background: rgba(99, 102, 241, 0.5);
-            border-radius: 10px;
-        }
-
-        .mojo-bubble {
-            background: rgba(255, 255, 255, 0.07);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px 20px 20px 5px;
-            animation: fadeIn 0.3s ease-out;
-        }
-
-        .user-bubble {
-            background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
-            border-radius: 20px 20px 5px 20px;
-            animation: fadeIn 0.3s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .typing-dots span {
-            width: 6px;
-            height: 6px;
-            background: #94a3b8;
-            border-radius: 50%;
-            display: inline-block;
-            animation: bounce 1.4s infinite ease-in-out;
-        }
-
-        .typing-dots span:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-
-        .typing-dots span:nth-child(3) {
-            animation-delay: 0.4s;
-        }
-
-        @keyframes bounce {
-
-            0%,
-            80%,
-            100% {
-                transform: scale(0);
-            }
-
-            40% {
-                transform: scale(1);
-            }
-        }
+        body { font-family: 'Inter', 'Hind Siliguri', sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); height: 100vh; overflow: hidden; }
+        .glass-panel { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .chat-window { height: calc(100vh - 180px); scroll-behavior: smooth; }
+        .mojo-bubble { background: rgba(255, 255, 255, 0.07); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px 20px 20px 5px; }
+        .user-bubble { background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%); border-radius: 20px 20px 5px 20px; }
+        /* Markdown Styling inside bubbles */
+        .prose-custom { font-size: 0.875rem; line-height: 1.5; color: #e2e8f0; }
+        .prose-custom p { margin-bottom: 0.5rem; }
+        .prose-custom code { background: rgba(0,0,0,0.3); padding: 2px 4px; border-radius: 4px; font-family: monospace; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade { animation: fadeIn 0.3s ease-out; }
     </style>
 </head>
-
 <body class="flex items-center justify-center p-0 sm:p-4">
-
-    <div
-        class="w-full max-w-2xl h-full sm:h-[90vh] glass-panel rounded-none sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden">
-
+    <div class="w-full max-w-2xl h-full sm:h-[90vh] glass-panel rounded-none sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+        
         <header class="p-5 border-b border-white/10 flex justify-between items-center bg-white/5">
             <div class="flex items-center gap-4">
                 <div class="relative">
-                    <div
-                        class="w-12 h-12 bg-gradient-to-tr from-indigo-500 to-purple-500 rounded-full flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                        <i class="fas fa-robot text-white text-xl"></i>
-                    </div>
-                    <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-[#1e1b4b] rounded-full">
-                    </div>
+                    <div class="w-12 h-12 bg-gradient-to-tr from-indigo-500 to-purple-500 rounded-full flex items-center justify-center shadow-lg"><i class="fas fa-robot text-white text-xl"></i></div>
+                    <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-[#1e1b4b] rounded-full"></div>
                 </div>
                 <div>
                     <h1 class="text-white font-semibold text-lg leading-none">MojoBot</h1>
                     <span class="text-indigo-300 text-xs font-medium">AI Companion • Online</span>
                 </div>
             </div>
-            <div class="flex gap-4">
-                <button class="text-slate-400 hover:text-white transition-colors"><i class="fas fa-search"></i></button>
-                <button class="text-slate-400 hover:text-white transition-colors"><i class="fas fa-cog"></i></button>
-            </div>
         </header>
 
         <div id="chat-container" class="chat-window p-5 overflow-y-auto space-y-6">
-            <div class="flex gap-3 items-end">
-                <div class="mojo-bubble p-4 text-slate-200 max-w-[85%] shadow-xl">
-                    <p class="text-sm">Hello! আমি <b>MojoBot</b>। আমি আপনার পার্সোনাল অ্যাসিস্ট্যান্ট। আজ আপনাকে কীভাবে
-                        সাহায্য করতে পারি?</p>
-                    <p class="text-[10px] text-slate-500 mt-2 uppercase tracking-widest font-bold">MojoBot • Now</p>
+            <div class="flex gap-3 items-end animate-fade">
+                <div class="mojo-bubble p-4 max-w-[85%] shadow-xl">
+                    <div class="prose-custom">Hello! আমি <b>MojoBot</b>। আমি আপনার পার্সোনাল অ্যাসিস্ট্যান্ট। আজ আপনাকে কীভাবে সাহায্য করতে পারি?</div>
                 </div>
             </div>
         </div>
 
         <div id="typing" class="px-5 py-2 hidden">
-            <div class="typing-dots flex gap-1 items-center">
-                <span class="text-xs text-slate-400 mr-2">MojoBot is thinking</span>
-                <span></span><span></span><span></span>
+            <div class="flex gap-2 items-center text-slate-400 text-xs italic">
+                <i class="fas fa-circle-notch animate-spin"></i> MojoBot is thinking...
             </div>
         </div>
 
         <div class="p-5 bg-white/5 border-t border-white/10">
-            <div class="flex gap-3 items-center relative">
-                <div class="flex-grow relative">
-                    <input type="text" id="userInput" onkeypress="if(event.key === 'Enter') sendMessage()"
-                        placeholder="আপনার প্রশ্ন এখানে লিখুন..."
-                        class="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-5 pr-14 text-slate-200 placeholder-slate-500 outline-none focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/20 transition-all">
-
-                    <button onclick="sendMessage()"
-                        class="absolute right-2 top-2 bottom-2 px-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl shadow-lg shadow-indigo-600/30 transition-all active:scale-95">
-                        <i class="fas fa-paper-plane"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="flex justify-center gap-4 mt-3">
-                <span class="text-[10px] text-slate-500"><i class="fas fa-bolt text-yellow-500 mr-1"></i> Muaz</span>
-                <span class="text-[10px] text-slate-500"><i class="fas fa-shield-halved text-blue-500 mr-1"></i> Secure
-                    Connection</span>
+            <div class="flex gap-3 items-center">
+                <input type="text" id="userInput" placeholder="আপনার প্রশ্ন এখানে লিখুন..." 
+                    class="flex-grow bg-white/5 border border-white/10 rounded-2xl py-4 px-5 text-slate-200 outline-none focus:border-indigo-500/50 transition-all">
+                <button onclick="sendMessage()" class="p-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl transition-all active:scale-95">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
             </div>
         </div>
     </div>
 
     <script>
         let chatHistory = [];
+        const input = document.getElementById('userInput');
+        const container = document.getElementById('chat-container');
+
+        input.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMessage(); });
 
         async function sendMessage() {
-            const input = document.getElementById('userInput');
-            const container = document.getElementById('chat-container');
-            const typing = document.getElementById('typing');
             const message = input.value.trim();
-
             if (!message) return;
 
-            // User Message UI
-            container.innerHTML += `
-                <div class="flex gap-3 items-end justify-end">
-                    <div class="user-bubble p-4 text-white max-w-[85%] shadow-xl">
-                        <p class="text-sm">${message}</p>
-                        <p class="text-[10px] text-indigo-200 mt-2 text-right uppercase font-bold">You</p>
-                    </div>
-                </div>`;
-
+            // Add User Bubble
+            addMessage(message, 'user');
             input.value = '';
-            container.scrollTop = container.scrollHeight;
-            typing.classList.remove('hidden');
+            document.getElementById('typing').classList.remove('hidden');
 
             try {
                 const response = await fetch('/chat', {
@@ -193,27 +88,39 @@
                 });
 
                 const data = await response.json();
-                typing.classList.add('hidden');
+                document.getElementById('typing').classList.add('hidden');
 
-                // MojoBot Message UI
-                container.innerHTML += `
-                    <div class="flex gap-3 items-end">
-                        <div class="mojo-bubble p-4 text-slate-200 max-w-[85%] shadow-xl">
-                            <p class="text-sm">${data.text}</p>
-                            <p class="text-[10px] text-slate-500 mt-2 uppercase tracking-widest font-bold">MojoBot</p>
-                        </div>
-                    </div>`;
-
-                chatHistory.push({ role: "user", parts: [{ text: message }] });
-                chatHistory.push({ role: "model", parts: [{ text: data.text }] });
-
-                container.scrollTop = container.scrollHeight;
+                if (data.text) {
+                    addMessage(data.text, 'bot');
+                    chatHistory.push({ role: "user", parts: [{ text: message }] });
+                    chatHistory.push({ role: "model", parts: [{ text: data.text }] });
+                }
             } catch (err) {
-                typing.classList.add('hidden');
-                container.innerHTML += `<div class="text-red-400 text-center text-xs"><i class="fas fa-circle-exclamation mr-1"></i> সরি, আমি সংযোগ করতে পারছি না।</div>`;
+                document.getElementById('typing').classList.add('hidden');
+                addMessage("সংযোগ বিচ্ছিন্ন হয়েছে। আবার চেষ্টা করুন।", 'error');
             }
+        }
+
+        function addMessage(text, side) {
+            const wrapper = document.createElement('div');
+            wrapper.className = `flex gap-3 items-end animate-fade ${side === 'user' ? 'justify-end' : ''}`;
+            
+            const isBot = side === 'bot' || side === 'error';
+            const bubbleClass = side === 'user' ? 'user-bubble' : 'mojo-bubble';
+            const textColor = side === 'user' ? 'text-white' : (side === 'error' ? 'text-red-400' : 'text-slate-200');
+
+            // Render Markdown for bot, plain text for user
+            const content = side === 'user' ? text : marked.parse(text);
+
+            wrapper.innerHTML = `
+                <div class="${bubbleClass} p-4 max-w-[85%] shadow-xl">
+                    <div class="prose-custom ${textColor}">${content}</div>
+                    <p class="text-[10px] opacity-50 mt-2 uppercase font-bold text-right">${side === 'user' ? 'You' : 'MojoBot'}</p>
+                </div>`;
+            
+            container.appendChild(wrapper);
+            container.scrollTop = container.scrollHeight;
         }
     </script>
 </body>
-
 </html>
